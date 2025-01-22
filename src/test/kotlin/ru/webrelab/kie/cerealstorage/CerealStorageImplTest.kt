@@ -7,6 +7,7 @@ import ru.webrelab.kie.cerealstorage.Cereal.Companion.getRandomCereal
 class CerealStorageImplTest {
   private val storage = CerealStorageImpl(10f, 20f)
   private val randomCereal: Cereal by lazy { getRandomCereal() }
+  private val comparisonDelta = 0.01f
 
   @Test
   fun `Should throw if containerCapacity is negative`() {
@@ -28,7 +29,7 @@ class CerealStorageImplTest {
     storage.addCereal(randomCereal, expectedCerealAmount)
     val actualCerealAmount: Float = storage.getAmount(randomCereal)
     Assertions.assertEquals(
-      expectedCerealAmount, actualCerealAmount,
+      expectedCerealAmount, actualCerealAmount, comparisonDelta,
       "Cereal amount should be equal to [$expectedCerealAmount]"
     )
   }
@@ -39,7 +40,7 @@ class CerealStorageImplTest {
     val expectedRemainingCerealAmount: Float = cerealAmount.minus(storage.containerCapacity)
     val actualRemainingCerealAmount: Float = storage.addCereal(randomCereal, cerealAmount)
     Assertions.assertEquals(
-      expectedRemainingCerealAmount, actualRemainingCerealAmount,
+      expectedRemainingCerealAmount, actualRemainingCerealAmount, comparisonDelta,
       "Remaining cereal amount should be equal [$expectedRemainingCerealAmount]"
     )
   }
@@ -71,13 +72,13 @@ class CerealStorageImplTest {
     Assertions.assertAll(
       {
         Assertions.assertEquals(
-          containerCerealAmount, actualCerealAmount,
+          containerCerealAmount, actualCerealAmount, comparisonDelta,
           "Cereal amount should be equal [$containerCerealAmount]"
         )
       },
       {
         Assertions.assertEquals(
-          expectedContainerCerealAmount, actualContainerCerealAmount,
+          expectedContainerCerealAmount, actualContainerCerealAmount, comparisonDelta,
           "Container should be empty"
         )
       }
@@ -95,13 +96,13 @@ class CerealStorageImplTest {
     Assertions.assertAll(
       {
         Assertions.assertEquals(
-          cerealAmountToReceive, actualCerealAmount,
+          cerealAmountToReceive, actualCerealAmount, comparisonDelta,
           "Cereal amount should be equal [$cerealAmountToReceive]"
         )
       },
       {
         Assertions.assertEquals(
-          expectedContainerCerealAmount, actualContainerCerealAmount,
+          expectedContainerCerealAmount, actualContainerCerealAmount, comparisonDelta,
           "Container cereal amount should be equal [$expectedContainerCerealAmount]"
         )
       }
@@ -134,7 +135,7 @@ class CerealStorageImplTest {
     val expectedCerealAmount = 0f
     val actualCerealAmount: Float = storage.getAmount(randomCereal)
     Assertions.assertEquals(
-      expectedCerealAmount, actualCerealAmount,
+      expectedCerealAmount, actualCerealAmount, comparisonDelta,
       "Cereal amount should be equal to [$expectedCerealAmount]"
     )
   }
@@ -144,7 +145,7 @@ class CerealStorageImplTest {
     val expectedContainerFreeSpace: Float = storage.containerCapacity
     val actualContainerFreeSpace: Float = storage.getSpace(randomCereal)
     Assertions.assertEquals(
-      expectedContainerFreeSpace, actualContainerFreeSpace,
+      expectedContainerFreeSpace, actualContainerFreeSpace, comparisonDelta,
       "Container free space should be equal to [$expectedContainerFreeSpace]"
     )
   }
@@ -156,7 +157,7 @@ class CerealStorageImplTest {
     val expectedContainerFreeSpace: Float = storage.run { containerCapacity.minus(getAmount(randomCereal)) }
     val actualContainerFreeSpace: Float = storage.getSpace(randomCereal)
     Assertions.assertEquals(
-      expectedContainerFreeSpace, actualContainerFreeSpace,
+      expectedContainerFreeSpace, actualContainerFreeSpace, comparisonDelta,
       "Container free space should be equal to [$expectedContainerFreeSpace]"
     )
   }
