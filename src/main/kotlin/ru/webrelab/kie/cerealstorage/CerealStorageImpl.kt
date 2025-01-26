@@ -66,18 +66,24 @@ class CerealStorageImpl(
     val containerFreeSpace: Float = getSpace(cereal)
     when (amount <= containerFreeSpace) {
       true -> storage += cereal to getAmount(cereal).plus(amount)
-      false -> error("Container with [$cereal] cereal already exists. New container can't be added")
+      false -> {
+        storage += cereal to containerCapacity
+        return amount.minus(containerFreeSpace)
+      }
     }
     return zeroCapacity
   }
 
   private fun addCerealToNotExistingContainer(cereal: Cereal, amount: Float): Float {
-    check(storage.size.plus(1) * containerCapacity < storageCapacity) {
+    check(storage.size.plus(1) * containerCapacity <= storageCapacity) {
       "Storage is full. New container can't be added"
     }
     when (amount <= containerCapacity) {
       true -> storage[cereal] = amount
-      false -> return amount.minus(containerCapacity)
+      false -> {
+        storage[cereal] = containerCapacity
+        return amount.minus(containerCapacity)
+      }
     }
     return zeroCapacity
   }
