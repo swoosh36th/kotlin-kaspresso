@@ -19,9 +19,17 @@ class CerealStorageImpl(
 
   override fun addCereal(cereal: Cereal, amount: Float): Float {
     verifyCerealAmountIsNotNegative(amount)
-    return when (storage.containsKey(cereal)) {
-      true -> addCerealToExistingContainer(cereal, amount)
-      false -> addCerealToNotExistingContainer(cereal, amount)
+    prepareCerealContainerIfNotExist(cereal)
+    val containerFreeSpace: Float = getSpace(cereal)
+    when (amount <= containerFreeSpace) {
+      true -> {
+        storage += cereal to getAmount(cereal).plus(amount)
+        return zeroCapacity
+      }
+      false -> {
+        storage += cereal to containerCapacity
+        return amount.minus(containerFreeSpace)
+      }
     }
   }
 
@@ -41,12 +49,13 @@ class CerealStorageImpl(
   }
 
   override fun getAmount(cereal: Cereal): Float {
-    return storage.getOrDefault(cereal, zeroCapacity)
+    prepareCerealContainerIfNotExist(cereal)
+    return storage.getValue(cereal)
   }
 
   override fun getSpace(cereal: Cereal): Float {
-    return storage[cereal]?.let { cerealAmount -> containerCapacity.minus(cerealAmount) }
-      ?: containerCapacity
+    prepareCerealContainerIfNotExist(cereal)
+    return containerCapacity.minus(storage.getValue(cereal))
   }
 
   override fun toString(): String {
@@ -62,29 +71,16 @@ class CerealStorageImpl(
     require(amount >= 0) { "Amount shouldn't be negative. Current value is [$amount]" }
   }
 
-  private fun addCerealToExistingContainer(cereal: Cereal, amount: Float): Float {
-    val containerFreeSpace: Float = getSpace(cereal)
-    when (amount <= containerFreeSpace) {
-      true -> storage += cereal to getAmount(cereal).plus(amount)
-      false -> {
-        storage += cereal to containerCapacity
-        return amount.minus(containerFreeSpace)
-      }
+  private fun prepareCerealContainerIfNotExist(cereal: Cereal) {
+    if (!storage.containsKey(cereal)) {
+      verifyStorageCapacity()
+      storage[cereal] = zeroCapacity
     }
-    return zeroCapacity
   }
 
-  private fun addCerealToNotExistingContainer(cereal: Cereal, amount: Float): Float {
+  private fun verifyStorageCapacity() {
     check(storage.size.plus(1) * containerCapacity <= storageCapacity) {
       "Storage is full. New container can't be added"
     }
-    when (amount <= containerCapacity) {
-      true -> storage[cereal] = amount
-      false -> {
-        storage[cereal] = containerCapacity
-        return amount.minus(containerCapacity)
-      }
-    }
-    return zeroCapacity
   }
 }
